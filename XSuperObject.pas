@@ -723,10 +723,8 @@ end;
 
 
 constructor TBaseJSON<T, Typ>.Create(JSON: String; const CheckDate: Boolean);
-type PInterface = ^IInterface;
 var
   JVal: IJSONAncestor;
-  PIntf: PInterface;
 begin
   FCheckDate := CheckDate;
   if (Self.InheritsFrom(TSuperArray)) and (Trim(JSON) = '{}') then JSON := '[]';
@@ -803,6 +801,7 @@ function TBaseJSON<T, Typ>.AsJSON(const Ident, UniversalTime: Boolean): String;
 var
   SBuild: TJSONWriter;
 begin
+  SBuild := nil;
   try
     SBuild := TJSONWriter.Create(Ident, UniversalTime);
     if Assigned(FCasted) then
@@ -1041,6 +1040,7 @@ function TBaseJSON<T, Typ>.GetType(Key: Typ): TVarType;
 var
   Temp: IJSONAncestor;
 begin
+  Result := varEmpty;
   Temp := GetData(Key);
   if Temp = Nil then
      Result := varUnknown
@@ -1295,7 +1295,7 @@ end;
 class function TSuperObject.ParseStream(Stream: TStream; CheckDate: Boolean): TSuperObject;
 var
   Strm: TStringStream;
-  preamble, tmp: TBytes;
+  tmp: TBytes;
   preambleLength: integer;
   enc: TEncoding;
 begin
@@ -1489,6 +1489,7 @@ var
   Ctx: TRttiContext;
   Typ: TRttiType;
 begin
+  Result := Default(T);
   Ctx := TRttiContext.Create;
   try
     Typ := Ctx.GetType(TypeInfo(T));
@@ -3267,10 +3268,8 @@ class function TJSON.Parse<T>(JSON: ISuperObject): T;
 var
   Ctx: TRttiContext;
   Typ: TRttiType;
-  DType: TDataType;
   _Array: ISuperArray;
   _PResult: Pointer;
-  I: Integer;
 type PTime = ^TTime;
 begin
   Ctx := TRttiContext.Create;
