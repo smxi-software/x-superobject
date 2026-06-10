@@ -222,7 +222,6 @@ type
     constructor Create(JSON: String = '{}'; const CheckDate: Boolean = True); overload;
     constructor Create(JSON: T; const CheckDate: Boolean = True); overload;
     constructor CreateCasted(Value: IJSONAncestor; const CheckDate: Boolean = True);
-    constructor CreateWithEscape(JSON: String = '{}'; const CheckDate: Boolean = True);
     destructor Destroy; override;
     property Null[V: Typ]: TMemberStatus read GetNull write SetNull;
     property S[V: Typ]: String read GetString write SetString;
@@ -408,6 +407,7 @@ type
     procedure SetData(V: String; Data: Variant); overload; inline;
     procedure SetData(V: String; Data: Variant; AFormatSettings: TFormatSettings); overload;
 
+    class function CreateWithEscape(JSON: String = '{}'; const CheckDate: Boolean = True): TSuperObject;
     class function ParseStream(Stream: TStream; CheckDate: Boolean = True): TSuperObject;
     class function ParseFile(FileName: String; CheckDate: Boolean = True): TSuperObject;
 
@@ -468,6 +468,7 @@ type
     procedure Clear;
     property Length: Integer read GetLength;
     function GetEnumerator: TSuperEnumerator<IJSONAncestor>;
+    class function CreateWithEscape(JSON: String = '[]'; const CheckDate: Boolean = True): TSuperArray;
     procedure SaveTo(Stream: TStream; const Ident: Boolean = false; const UniversalTime : Boolean = false); overload; override;
     procedure SaveTo(AFile: String; const Ident: Boolean = false; const UniversalTime : Boolean = false); overload; override;
     procedure Sort(Comparison: TJSONComparison<IMember>); override;
@@ -840,11 +841,6 @@ begin
   FInterface := Nil;
   FCasted := Value;
   FCheckDate := CheckDate;
-end;
-
-constructor TBaseJSON<T, Typ>.CreateWithEscape(JSON: String; const CheckDate: Boolean);
-begin
-  Create(LimitedStrToUTF16(JSON), CheckDate);
 end;
 
 function TBaseJSON<T, Typ>.DefaultValueClass<TT>(const Value): TT;
@@ -1270,6 +1266,11 @@ begin
   Result := GetValue<TJSONRaw>(V).ValueEx<String>;
 end;
 
+class function TSuperObject.CreateWithEscape(JSON: String; const CheckDate: Boolean): TSuperObject;
+begin
+  Result := TSuperObject.Create(LimitedStrToUTF16(JSON), CheckDate);
+end;
+
 function TSuperObject.GetString(V: String): String;
 begin
   Result := inherited GetString(V);
@@ -1549,6 +1550,11 @@ function TSuperArray.GetEnumerator: TSuperEnumerator<IJSONAncestor>;
 begin
   Result.Index := -1;
   Result.List := TJSONArray(FJSONObj).GetEnumerator
+end;
+
+class function TSuperArray.CreateWithEscape(JSON: String; const CheckDate: Boolean): TSuperArray;
+begin
+  Result := TSuperArray.Create(LimitedStrToUTF16(JSON), CheckDate);
 end;
 
 function TSuperArray.GetLength: Integer;
